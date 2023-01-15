@@ -5,7 +5,7 @@ module.exports = {
     extend: {},
     fontFamily: {
       'Malven-Pro': ['Maven Pro', 'sans-serif'],
-    }
+    },
   },
-  plugins: [],
+  plugins: [require("daisyui")],
 }
