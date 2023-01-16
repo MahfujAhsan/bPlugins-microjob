@@ -1,16 +1,14 @@
-
-import { Route, Routes } from "react-router-dom";
-import NavBar from "./components/NavBar/NavBar";
-import SignUp from "./components/SignUp/SignUp";
+import { RouterProvider } from "react-router-dom";
+import router from "./Routes/Routes/Routes";
 
 
 function App() {
+  
   return (
-    <div>
-      <NavBar />
-      <Routes>
-        <Route path="/sign-in" element={<SignUp />} />
-      </Routes>
+    <div className="max-w-[1240px] mx-auto">
+      <RouterProvider router={router}>
+          
+      </RouterProvider>
     </div>
   );
 }
