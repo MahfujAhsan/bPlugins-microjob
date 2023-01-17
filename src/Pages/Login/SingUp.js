@@ -7,6 +7,7 @@ import GoogleLogo from "../../assets/WebMaterials/google.svg";
 
 const SingUp = () => {
     const options = ['Male', 'Female'];
+    const countryName = ['Bangladesh', 'United Kingdom'];
     const onOptionChangeHandler = (event) => {
         console.log("User Selected Value - ", event.target.value)
     }
@@ -81,15 +82,55 @@ const SingUp = () => {
                             <label className="label">
                                 <span className="label-text text-[15px] font-semibold text-[#9a9a9a] mb-[4px]">Gender</span>
                             </label>
-                            <select onChange={onOptionChangeHandler} {...register("gender")} className='input input-bordered font-bold' name="gender" id="genders">
-                                <option selected value="">--Select Options--</option>
+                            <select onChange={onOptionChangeHandler} {...register("gender", {required: "*********************"})} className='input input-bordered font-bold' name="gender" id="genders">
+                                <option selected value="">--Select One--</option>
                                 {
                                     options.map((option, index) => {
                                         return <option key={index}>{option}</option>
                                     })
                                 }
                             </select>
+
                         </div>
+
+                        {/* <div className='form-control w-[550px]'>
+                            <label className="label">
+                                <span className="label-text text-[15px] font-semibold text-[#9a9a9a] mb-[4px]">Gender</span>
+                            </label>
+                            <select onChange={onOptionChangeHandler} {...register("gender")} className='input input-bordered font-bold' name="gender" id="genders">
+                                <option selected value="">--Select One--</option>
+                                {
+                                    options.map((option, index) => {
+                                        return <option key={index}>{option}</option>
+                                    })
+                                }
+                            </select>
+
+                        </div>
+
+                        <div className='form-control w-[550px]'>
+                            <label className="label">
+                                <span className="label-text text-[15px] font-semibold text-[#9a9a9a] mb-[4px]">Select your Country</span>
+                            </label>
+                            <select onChange={onOptionChangeHandler} {...register("country")} className='input input-bordered cursor-pointer' name="country" id="country">
+                                <option selected value="">Select Country</option>
+                                {
+                                    countryName.map((country, index) => {
+                                        return <option key={index}>{country}</option>
+                                    })
+                                }
+                            </select>
+                        </div>
+
+                        <div className="form-control w-[550px]">
+                            <label className="label">
+                                <span className="label-text text-[15px] font-semibold text-[#9a9a9a]">Select Region</span>
+                            </label>
+                            <input placeholder='Select Region' type="email"
+                                {...register("region", { required: "Region is required" })}
+                                className="input input-bordered" />
+                            {errors.region && <p className='text-red-600 font-Malven-Pro font-semibold pl-[4px] mt-[3px]'>{errors.region?.message}</p>}
+                        </div> */}
 
                         <div className='flex justify-between mt-[15px]'>
                             <input type="checkbox" />
