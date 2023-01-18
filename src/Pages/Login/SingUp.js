@@ -2,19 +2,22 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import SignupIllusion from "../../assets/WebMaterials/signup-illusion.webp";
-import FacebookLogo from "../../assets/WebMaterials/facebook.svg";
-import GoogleLogo from "../../assets/WebMaterials/google.svg";
-import { useCreateUserWithEmailAndPassword, useUpdateProfile } from 'react-firebase-hooks/auth';
+import { useCreateUserWithEmailAndPassword, useSignInWithFacebook, useSignInWithGoogle, useUpdateProfile } from 'react-firebase-hooks/auth';
 import { getAuth } from 'firebase/auth';
 import app from '../../Firebase/firebase.config';
 import useToken from '../../Hooks/useToken';
+import SocialButtons from '../../Hooks/SocialButtons';
 
 const SingUp = () => {
-    
+
     const auth = getAuth(app);
 
     const { register, formState: { errors }, handleSubmit } = useForm();
-    
+
+    const [signInWithFacebook, facebookUser, facebookLoading, facebookError] = useSignInWithFacebook(auth);
+
+    const [signInWithGoogle, googleUser, googleLoading, googleError] = useSignInWithGoogle(auth);
+
     const [
         createUserWithEmailAndPassword,
         user,
@@ -23,30 +26,30 @@ const SingUp = () => {
     ] = useCreateUserWithEmailAndPassword(auth);
 
     const [updateProfile, updating, updateError] = useUpdateProfile(auth);
-    const [token] = useToken(user);
+    const [token] = useToken(user || googleUser || facebookUser);
     const navigate = useNavigate();
 
     let errorText;
 
-    if(loading || updating ){
+    if (loading || updating || googleLoading || facebookLoading) {
         return <div>Signing...</div>
     }
 
-    if(error || updateError){
+    if (error || updateError || googleError || facebookError) {
         errorText = <p className='text-red-600 font-Malven-Pro font-semibold mt-[4px]'>{error.message}</p>
     }
 
-    if(token){
+    if (token) {
         navigate("/")
     }
 
-    const onSubmit = async(data) => {
+    const onSubmit = async (data) => {
         console.log(data)
-        await createUserWithEmailAndPassword(data.email, data.password, data.name);
+        await createUserWithEmailAndPassword(data.email, data.password, data.name, data.birthDate);
         await updateProfile({ displayName: data.name });
     };
 
-    
+
 
     return (
         <div className='flex justify-between font-Malven-Pro'>
@@ -58,7 +61,7 @@ const SingUp = () => {
                 <div className='w-[600px]'>
                     <form className='w-11/12' onSubmit={handleSubmit((onSubmit))}>
 
-                    <div className="form-control w-[550px]">
+                        <div className="form-control w-[550px]">
                             <label className="label">
                                 <span className="label-text text-[15px] font-semibold text-[#9a9a9a]">Your full name</span>
                             </label>
@@ -70,14 +73,26 @@ const SingUp = () => {
 
                         <div className="form-control w-[550px]">
                             <label className="label">
+                                <span className="label-text text-[15px] font-semibold text-[#9a9a9a]">Date of Birth</span>
+                            </label>
+                            <input type="date"
+                                {...register("birthDate", { required: "Birth Date is required" })}
+                                className="input input-bordered" />
+                            {errors.birthDate && <p className='text-red-600 font-Malven-Pro font-semibold pl-[4px] mt-[3px]'>{errors.birthDate?.message}</p>}
+                        </div>
+
+                        <div className="form-control w-[550px]">
+                            <label className="label">
                                 <span className="label-text text-[15px] font-semibold text-[#9a9a9a]">E-mail</span>
                             </label>
                             <input type="email"
-                                {...register("email", { required: "Email is required",
-                                pattern: {
-                                    value: /[a-z0-9]+@[a-z]+\.[a-z]{2,3}/,
-                                    message: 'Enter a valid Email'
-                                } },
+                                {...register("email", {
+                                    required: "Email is required",
+                                    pattern: {
+                                        value: /[a-z0-9]+@[a-z]+\.[a-z]{2,3}/,
+                                        message: 'Enter a valid Email'
+                                    }
+                                },
                                 )}
                                 className="input input-bordered" />
                             {errors.email?.type === 'required' && <p className='text-red-600 font-Malven-Pro font-semibold pl-[4px] mt-[3px]'>{errors.email?.message}</p>}
@@ -107,14 +122,7 @@ const SingUp = () => {
                         <button className='mt-[25px] mb-[5px] w-[550px] bg-transparent border-[2px] border-[#f2413a] py-[12px] rounded-[10px] text-[#f2413a] font-bold hover:text-[#fff] hover:bg-[#f2413a]'>Register</button>
                     </form>
                     <div className='divider'>or</div>
-                    <button type='submit' className='mt-[5px] w-[550px] bg-transparent border-[2px] border-[#212529] py-[12px] rounded-[10px] text-[#212529] font-bold hover:text-[#fff] hover:bg-[#212529] flex justify-center items-center gap-x-[45px]'>
-                        <img className='h-[25px] w-[25px] text-left' src={FacebookLogo} alt="facebook_logo" />
-                        <p>Login With Facebook</p>
-                    </button>
-                    <button type='submit' className='mt-[25px] w-[550px] bg-transparent border-[2px] border-[#212529] py-[12px] rounded-[10px] text-[#212529] font-bold hover:text-[#fff] hover:bg-[#212529] flex justify-center items-center gap-x-[45px]'>
-                        <img className='h-[25px] w-[25px] text-left' src={GoogleLogo} alt="facebook_logo" />
-                        <p>Login With Google</p>
-                    </button>
+                    <SocialButtons googleLogin={signInWithGoogle} facebookLogin={signInWithFacebook} />
                 </div>
             </div>
             <div>

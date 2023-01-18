@@ -2,12 +2,11 @@ import React, { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import LoginIllusion from "../../assets/WebMaterials/login-illusion.webp";
-import FacebookLogo from "../../assets/WebMaterials/facebook.svg";
-import GoogleLogo from "../../assets/WebMaterials/google.svg";
-import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
+import { useSignInWithEmailAndPassword, useSignInWithFacebook, useSignInWithGoogle } from 'react-firebase-hooks/auth';
 import { getAuth } from 'firebase/auth';
 import app from '../../Firebase/firebase.config';
 import useToken from '../../Hooks/useToken';
+import SocialButtons from '../../Hooks/SocialButtons';
 
 const SignIn = () => {
     
@@ -15,6 +14,9 @@ const SignIn = () => {
 
     const { register, formState: { errors }, handleSubmit } = useForm();
     
+    const [signInWithFacebook, facebookUser, facebookLoading, facebookError] = useSignInWithFacebook(auth);
+
+    const [signInWithGoogle, googleUser, googleLoading, googleError] = useSignInWithGoogle(auth);
 
     const [
         signInWithEmailAndPassword,
@@ -23,7 +25,7 @@ const SignIn = () => {
         error,
     ] = useSignInWithEmailAndPassword(auth);
 
-    const [token] = useToken(user);
+    const [token] = useToken(user || googleUser || facebookUser);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -37,17 +39,18 @@ const SignIn = () => {
         };
     }, [token, navigate, from])
 
-    if(loading) {
+    if(loading || facebookLoading || googleLoading) {
         return <div>Loading...</div>;
     }
 
-    if(error) {
+    if(error || googleError || facebookError) {
         errorText = <p className='text-red-600 font-Malven-Pro font-semibold mt-[4px]'>{error.message}</p>
     }
 
     const handleLogin = (userInfo) => {
         signInWithEmailAndPassword(userInfo.email, userInfo.password)
     };
+
 
     
 
@@ -95,14 +98,7 @@ const SignIn = () => {
                         <button type='submit' className='mt-[25px] mb-[5px] w-[550px] bg-transparent border-[2px] border-[#f2413a] py-[12px] rounded-[10px] text-[#f2413a] font-bold hover:text-[#fff] hover:bg-[#f2413a]'>Login</button>
                     </form>
                     <div className='divider'>or</div>
-                    <button type='submit' className='mt-[5px] w-[550px] bg-transparent border-[2px] border-[#212529] py-[12px] rounded-[10px] text-[#212529] font-bold hover:text-[#fff] hover:bg-[#212529] flex justify-center items-center gap-x-[45px]'>
-                        <img className='h-[25px] w-[25px] text-left' src={FacebookLogo} alt="facebook_logo" />
-                        <p>Login With Facebook</p>
-                    </button>
-                    <button type='submit' className='mt-[25px] w-[550px] bg-transparent border-[2px] border-[#212529] py-[12px] rounded-[10px] text-[#212529] font-bold hover:text-[#fff] hover:bg-[#212529] flex justify-center items-center gap-x-[45px]'>
-                        <img className='h-[25px] w-[25px] text-left' src={GoogleLogo} alt="facebook_logo" />
-                        <p>Login With Google</p>
-                    </button>
+                    <SocialButtons googleLogin={signInWithGoogle} facebookLogin={signInWithFacebook}/>
                 </div>
             </div>
             <div>
