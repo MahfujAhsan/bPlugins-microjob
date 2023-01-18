@@ -1,0 +1,19 @@
+{/* <div className="form-control w-[550px]">
+                            <label className="label">
+                                <span className="label-text text-[15px] font-semibold text-[#9a9a9a]">Your full name</span>
+                            </label>
+                            <input type="text"
+                                {...register("name", { required: "Name is required" })}
+                                className="input input-bordered" />
+                            {errors.name && <p className='text-red-600 font-Malven-Pro font-semibold pl-[4px] mt-[3px]'>{errors.name?.message}</p>}
+                        </div> */}
+
+                        {/* <div className="form-control w-[550px]">
+                            <label className="label">
+                                <span className="label-text text-[15px] font-semibold text-[#9a9a9a]">Date of Birth</span>
+                            </label>
+                            <input type="date"
+                                {...register("birthDate", { required: "Birth Date is required" })}
+                                className="input input-bordered" />
+                            {errors.birthDate && <p className='text-red-600 font-Malven-Pro font-semibold pl-[4px] mt-[3px]'>{errors.birthDate?.message}</p>}
+                        </div> */}

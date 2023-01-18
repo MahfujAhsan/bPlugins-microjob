@@ -1,0 +1,24 @@
+// const auth = getAuth(app);
+
+    // const [email, setEmail] = useState('');
+    // const [password, setPassword] = useState('');
+
+    // const onOptionChangeHandler = (event) => {
+    //     createUserWithEmailAndPassword(email, password);
+    // }
+
+    Options input array
+
+    // -------Solution Required------
+    // const options = ['Male', 'Female'];
+    // const countryName = ['Bangladesh', 'United Kingdom'];
+
+
+    .catch((error) => {
+                var errorCode = error.code;
+                var errorMsg = error.message;
+            });
+
+            <React.Fragment>
+            <p>{error.message}</p>
+        </React.Fragment>

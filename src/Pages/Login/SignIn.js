@@ -1,17 +1,55 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import LoginIllusion from "../../assets/WebMaterials/login-illusion.webp";
 import FacebookLogo from "../../assets/WebMaterials/facebook.svg";
 import GoogleLogo from "../../assets/WebMaterials/google.svg";
+import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
+import { getAuth } from 'firebase/auth';
+import app from '../../Firebase/firebase.config';
+import useToken from '../../Hooks/useToken';
 
 const SignIn = () => {
+    
+    const auth = getAuth(app);
 
     const { register, formState: { errors }, handleSubmit } = useForm();
+    
 
-    const handleLogin = (data) => {
-        console.log(data)
+    const [
+        signInWithEmailAndPassword,
+        user,
+        loading,
+        error,
+    ] = useSignInWithEmailAndPassword(auth);
+
+    const [token] = useToken(user);
+
+    const navigate = useNavigate();
+    const location = useLocation();
+    let from = location.state?.from?.pathname || "/";
+
+    let errorText;
+
+    useEffect(() => {
+        if (token) {
+            navigate(from, { replace: true });
+        };
+    }, [token, navigate, from])
+
+    if(loading) {
+        return <div>Loading...</div>;
+    }
+
+    if(error) {
+        errorText = <p className='text-red-600 font-Malven-Pro font-semibold mt-[4px]'>{error.message}</p>
+    }
+
+    const handleLogin = (userInfo) => {
+        signInWithEmailAndPassword(userInfo.email, userInfo.password)
     };
+
+    
 
     return (
         <div className='flex justify-between items-center font-Malven-Pro'>
@@ -40,12 +78,20 @@ const SignIn = () => {
                                 className="input input-bordered" />
                             {errors.password && <p className='text-red-600 font-Malven-Pro font-semibold pl-[4px] mt-[3px]'>{errors.password?.message}</p>}
                         </div>
+
+                        <p>{loading}</p>
+
+                        {errorText}
+
                         <div className='flex justify-between mt-[15px]'>
                             <input type="checkbox" />
                             <Link className='text-[#3490dc] font-[500]' to="#">
                                 Forgot Your Password?
                             </Link>
                         </div>
+
+
+
                         <button type='submit' className='mt-[25px] mb-[5px] w-[550px] bg-transparent border-[2px] border-[#f2413a] py-[12px] rounded-[10px] text-[#f2413a] font-bold hover:text-[#fff] hover:bg-[#f2413a]'>Login</button>
                     </form>
                     <div className='divider'>or</div>

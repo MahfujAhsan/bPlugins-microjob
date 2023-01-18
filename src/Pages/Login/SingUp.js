@@ -1,22 +1,52 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SignupIllusion from "../../assets/WebMaterials/signup-illusion.webp";
 import FacebookLogo from "../../assets/WebMaterials/facebook.svg";
 import GoogleLogo from "../../assets/WebMaterials/google.svg";
+import { useCreateUserWithEmailAndPassword, useUpdateProfile } from 'react-firebase-hooks/auth';
+import { getAuth } from 'firebase/auth';
+import app from '../../Firebase/firebase.config';
+import useToken from '../../Hooks/useToken';
 
 const SingUp = () => {
-    const options = ['Male', 'Female'];
-    const countryName = ['Bangladesh', 'United Kingdom'];
-    const onOptionChangeHandler = (event) => {
-        console.log("User Selected Value - ", event.target.value)
-    }
+    
+    const auth = getAuth(app);
 
     const { register, formState: { errors }, handleSubmit } = useForm();
+    
+    const [
+        createUserWithEmailAndPassword,
+        user,
+        loading,
+        error,
+    ] = useCreateUserWithEmailAndPassword(auth);
 
-    const handleLogin = (data) => {
+    const [updateProfile, updating, updateError] = useUpdateProfile(auth);
+    const [token] = useToken(user);
+    const navigate = useNavigate();
+
+    let errorText;
+
+    if(loading || updating ){
+        return <div>Signing...</div>
+    }
+
+    if(error || updateError){
+        errorText = <p className='text-red-600 font-Malven-Pro font-semibold mt-[4px]'>{error.message}</p>
+    }
+
+    if(token){
+        navigate("/")
+    }
+
+    const onSubmit = async(data) => {
         console.log(data)
+        await createUserWithEmailAndPassword(data.email, data.password, data.name);
+        await updateProfile({ displayName: data.name });
     };
+
+    
 
     return (
         <div className='flex justify-between font-Malven-Pro'>
@@ -26,9 +56,9 @@ const SingUp = () => {
                     <p className='mb-[1.5rem] font-[700]'>You already have an account on Jobboy? <Link className='text-[#e3342f] hover:text-[#3490dc]' to="/login">Sign In</Link></p>
                 </div>
                 <div className='w-[600px]'>
-                    <form className='w-11/12' onSubmit={handleSubmit((handleLogin))}>
+                    <form className='w-11/12' onSubmit={handleSubmit((onSubmit))}>
 
-                        <div className="form-control w-[550px]">
+                    <div className="form-control w-[550px]">
                             <label className="label">
                                 <span className="label-text text-[15px] font-semibold text-[#9a9a9a]">Your full name</span>
                             </label>
@@ -40,22 +70,19 @@ const SingUp = () => {
 
                         <div className="form-control w-[550px]">
                             <label className="label">
-                                <span className="label-text text-[15px] font-semibold text-[#9a9a9a]">Date of Birth</span>
-                            </label>
-                            <input type="date"
-                                {...register("birthDate", { required: "Birth Date is required" })}
-                                className="input input-bordered" />
-                            {errors.birthDate && <p className='text-red-600 font-Malven-Pro font-semibold pl-[4px] mt-[3px]'>{errors.birthDate?.message}</p>}
-                        </div>
-
-                        <div className="form-control w-[550px]">
-                            <label className="label">
                                 <span className="label-text text-[15px] font-semibold text-[#9a9a9a]">E-mail</span>
                             </label>
                             <input type="email"
-                                {...register("email", { required: "Email is required" })}
+                                {...register("email", { required: "Email is required",
+                                pattern: {
+                                    value: /[a-z0-9]+@[a-z]+\.[a-z]{2,3}/,
+                                    message: 'Enter a valid Email'
+                                } },
+                                )}
                                 className="input input-bordered" />
-                            {errors.email && <p className='text-red-600 font-Malven-Pro font-semibold pl-[4px] mt-[3px]'>{errors.email?.message}</p>}
+                            {errors.email?.type === 'required' && <p className='text-red-600 font-Malven-Pro font-semibold pl-[4px] mt-[3px]'>{errors.email?.message}</p>}
+                            {errors.email?.type === 'pattern' && <p className='text-red-600 font-Malven-Pro font-semibold pl-[4px] mt-[3px]'>{errors.email?.message}</p>}
+
                         </div>
 
                         <div className="form-control w-[550px]">
@@ -68,69 +95,7 @@ const SingUp = () => {
                             {errors.password && <p className='text-red-600 font-Malven-Pro font-semibold pl-[4px] mt-[3px]'>{errors.password?.message}</p>}
                         </div>
 
-                        <div className="form-control w-[550px]">
-                            <label className="label">
-                                <span className="label-text text-[15px] font-semibold text-[#9a9a9a]">Password Again</span>
-                            </label>
-                            <input type="password"
-                                {...register("passwordAgain", { required: "Password Again is required", minLength: { value: 6, message: 'Password must be 6 characters or longer' } })}
-                                className="input input-bordered" />
-                            {errors.passwordAgain && <p className='text-red-600 font-Malven-Pro font-semibold pl-[4px] mt-[3px]'>{errors.passwordAgain?.message}</p>}
-                        </div>
 
-                        <div className='form-control w-[550px]'>
-                            <label className="label">
-                                <span className="label-text text-[15px] font-semibold text-[#9a9a9a] mb-[4px]">Gender</span>
-                            </label>
-                            <select onChange={onOptionChangeHandler} {...register("gender", {required: "*********************"})} className='input input-bordered font-bold' name="gender" id="genders">
-                                <option selected value="">--Select One--</option>
-                                {
-                                    options.map((option, index) => {
-                                        return <option key={index}>{option}</option>
-                                    })
-                                }
-                            </select>
-
-                        </div>
-
-                        {/* <div className='form-control w-[550px]'>
-                            <label className="label">
-                                <span className="label-text text-[15px] font-semibold text-[#9a9a9a] mb-[4px]">Gender</span>
-                            </label>
-                            <select onChange={onOptionChangeHandler} {...register("gender")} className='input input-bordered font-bold' name="gender" id="genders">
-                                <option selected value="">--Select One--</option>
-                                {
-                                    options.map((option, index) => {
-                                        return <option key={index}>{option}</option>
-                                    })
-                                }
-                            </select>
-
-                        </div>
-
-                        <div className='form-control w-[550px]'>
-                            <label className="label">
-                                <span className="label-text text-[15px] font-semibold text-[#9a9a9a] mb-[4px]">Select your Country</span>
-                            </label>
-                            <select onChange={onOptionChangeHandler} {...register("country")} className='input input-bordered cursor-pointer' name="country" id="country">
-                                <option selected value="">Select Country</option>
-                                {
-                                    countryName.map((country, index) => {
-                                        return <option key={index}>{country}</option>
-                                    })
-                                }
-                            </select>
-                        </div>
-
-                        <div className="form-control w-[550px]">
-                            <label className="label">
-                                <span className="label-text text-[15px] font-semibold text-[#9a9a9a]">Select Region</span>
-                            </label>
-                            <input placeholder='Select Region' type="email"
-                                {...register("region", { required: "Region is required" })}
-                                className="input input-bordered" />
-                            {errors.region && <p className='text-red-600 font-Malven-Pro font-semibold pl-[4px] mt-[3px]'>{errors.region?.message}</p>}
-                        </div> */}
 
                         <div className='flex justify-between mt-[15px]'>
                             <input type="checkbox" />
@@ -138,7 +103,8 @@ const SingUp = () => {
                                 Forgot Your Password?
                             </Link>
                         </div>
-                        <button type='submit' className='mt-[25px] mb-[5px] w-[550px] bg-transparent border-[2px] border-[#f2413a] py-[12px] rounded-[10px] text-[#f2413a] font-bold hover:text-[#fff] hover:bg-[#f2413a]'>Login</button>
+                        {errorText}
+                        <button className='mt-[25px] mb-[5px] w-[550px] bg-transparent border-[2px] border-[#f2413a] py-[12px] rounded-[10px] text-[#f2413a] font-bold hover:text-[#fff] hover:bg-[#f2413a]'>Register</button>
                     </form>
                     <div className='divider'>or</div>
                     <button type='submit' className='mt-[5px] w-[550px] bg-transparent border-[2px] border-[#212529] py-[12px] rounded-[10px] text-[#212529] font-bold hover:text-[#fff] hover:bg-[#212529] flex justify-center items-center gap-x-[45px]'>
